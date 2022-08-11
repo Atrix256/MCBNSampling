@@ -45,3 +45,16 @@ inline float ToroidalDistance(const std::array<float, N>& A, const std::array<fl
 {
     return std::sqrt(ToroidalDistanceSq(A, B));
 }
+
+template <size_t N>
+inline float DistanceSq(const std::array<float, N>& A, const std::array<float, N>& B)
+{
+    std::array<float, N> v = B - A;
+    return Dot(v, v);
+}
+
+template <size_t N>
+inline float Distance(const std::array<float, N>&A, const std::array<float, N>&B)
+{
+    return std::sqrt(DistanceSq(A, B));
+}

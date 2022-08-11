@@ -23,19 +23,29 @@ struct Point
 
 #include "PaperDataSets.h"
 
-void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points, int imageSize = 128)
+void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points, int imageSize = 256)
 {
     // show metrics
+    float minX = FLT_MAX;
+    float minY = FLT_MAX;
+    float maxX = -FLT_MAX;
+    float maxY = -FLT_MAX;
     std::vector<int> classCounts;
     for (const Point& p : points)
     {
         if (p.classIndex >= classCounts.size())
             classCounts.resize(p.classIndex + 1, 0);
         classCounts[p.classIndex]++;
+
+        minX = std::min(minX, p.v[0]);
+        maxX = std::max(maxX, p.v[0]);
+        minY = std::min(minY, p.v[1]);
+        maxY = std::max(maxY, p.v[1]);
     }
     printf("Making %s\n%i points\n", baseFileName, (int)points.size());
     for (int i = 0; i < classCounts.size(); ++i)
         printf("  %i : %i\n", i, classCounts[i]);
+    //printf("min/max = (%f, %f) - (%f, %f)\n", minX, minY, maxX, maxY);
 
     // make images
     {
@@ -54,6 +64,8 @@ void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points
 
             int x = (int)Clamp(p.v[0] * float(imageSize), 0.0f, float(imageSize - 1));
             int y = (int)Clamp(p.v[1] * float(imageSize), 0.0f, float(imageSize - 1));
+
+            // TODO: draw gaussian blobs instead of this!
 
             images[0][(y * imageSize + x) * 3 + 0] = RGBU8[0];
             images[0][(y * imageSize + x) * 3 + 1] = RGBU8[1];
@@ -186,8 +198,9 @@ std::vector<Point> MCBNHardDisk(const HardLayer(&layers_)[N], int targetCount)
                     if (ret[j].classIndex != i)
                         continue;
 
+                    // TODO: switch to toroidal distance after things are working?
                     const Vec2& v = ret[j].v;
-                    float distance = ToroidalDistance(v, point);
+                    float distance = Distance(v, point);
                     if (distance < closestDistance)
                     {
                         closestDistance = distance;
@@ -274,9 +287,14 @@ int main(int argc, char** argv)
     MakeSamplesImage("out/hard", MCBNHardDisk({ {0.04f}, {0.02f}, {0.01f} }, 10000));
     MakeSamplesImage("out/MCBNSPaper", GetPaperDataSet());
 
-    // NOTE: rmatrix is good. compare the rest of the functionality.
+    // TODO: you only get like 5k points on the texture, when they get 6k.
+
+    // TODO: they do this thing where they only remove the neighbors if neighbors_all_removable. They also keep a list of all the conflicts and remove all, or not.
+
     // ALSO: how do they calculate the target point count?
     //MakeSamplesImage("out/hard.png", MCBNHardDisk({ {3.0f}, {2.0f}, {1.0f} }, 1000));
+
+    // TODO: the paper impl doesn't use toroidal distance, just regular distance!
 
     return 0;
 }
@@ -290,9 +308,9 @@ TODO:
 
 Notes:
 - not a fan of dart throwing blue noise (show why via DFT?)
-
+- Theirs is faster than mine cause they use a grid for acceleration
 
 TODO: could revive other repo by forking it.
-command line param: .\DartThrowing.exe 2 3 1 1 1 0.04 0.02 0.01 4 1 1.5 > out.txt
+command line param: .\DartThrowing.exe 2 3 1 1 1 0.04 0.02 0.01 4 1 1 > out.txt
 */
 
