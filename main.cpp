@@ -23,7 +23,34 @@ struct Point
 
 #include "PaperDataSets.h"
 
-void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points, int imageSize = 256)
+void DrawDot(unsigned char* pixels, int imageSize, int x, int y, float radius, const unsigned char (&RGB)[3])
+{
+    int paddedRadius = int(radius) + 3;
+
+    for (int iy = -paddedRadius; iy <= paddedRadius; ++iy)
+    {
+        int py = (y + iy + imageSize) % imageSize;
+        for (int ix = -paddedRadius; ix <= paddedRadius; ++ix)
+        {
+            int px = (x + ix + imageSize) % imageSize;
+
+            float distanceToSurface = ToroidalDistance(Vec2{ (float)x, (float)y }, Vec2{ (float)px, (float)py }, float(imageSize));
+            distanceToSurface -= radius;
+
+            float alpha = 1.0f - SmoothStep(0.0f, 2.0f, distanceToSurface);
+
+            if (alpha > 0)
+            {
+                unsigned char* pixel = &pixels[(py * imageSize + px) * 3];
+                pixel[0] = (unsigned char)Lerp((float)pixel[0], (float)RGB[0], alpha);
+                pixel[1] = (unsigned char)Lerp((float)pixel[1], (float)RGB[1], alpha);
+                pixel[2] = (unsigned char)Lerp((float)pixel[2], (float)RGB[2], alpha);
+            }
+        }
+    }
+}
+
+void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points, int imageSize = 256, float dotSize = 0.5f)
 {
     // show metrics
     float minX = FLT_MAX;
@@ -65,15 +92,8 @@ void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points
             int x = (int)Clamp(p.v[0] * float(imageSize), 0.0f, float(imageSize - 1));
             int y = (int)Clamp(p.v[1] * float(imageSize), 0.0f, float(imageSize - 1));
 
-            // TODO: draw gaussian blobs instead of this!
-
-            images[0][(y * imageSize + x) * 3 + 0] = RGBU8[0];
-            images[0][(y * imageSize + x) * 3 + 1] = RGBU8[1];
-            images[0][(y * imageSize + x) * 3 + 2] = RGBU8[2];
-
-            images[p.classIndex + 1][(y * imageSize + x) * 3 + 0] = RGBU8[0];
-            images[p.classIndex + 1][(y * imageSize + x) * 3 + 1] = RGBU8[1];
-            images[p.classIndex + 1][(y * imageSize + x) * 3 + 2] = RGBU8[2];
+            DrawDot(images[0].data(), imageSize, x, y, dotSize, RGBU8);
+            DrawDot(images[p.classIndex + 1].data(), imageSize, x, y, dotSize, RGBU8);
         }
 
         for (int i = 0; i < classCounts.size() + 1; ++i)
