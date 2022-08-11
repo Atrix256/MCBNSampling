@@ -14,10 +14,16 @@
     </ClInclude>
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="IndexToColor.h" />
+    <ClInclude Include="PaperDataSets.h">
+      <Filter>OrigPaper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="pcg">
       <UniqueIdentifier>{4a8d244c-8646-4ad4-9caf-8c4d9a69c093}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OrigPaper">
+      <UniqueIdentifier>{4d572751-8190-40ff-b5f5-931647ef6d37}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

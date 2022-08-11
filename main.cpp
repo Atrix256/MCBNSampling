@@ -15,32 +15,65 @@
 typedef std::array<float, 2> Vec2;
 typedef std::array<float, 3> Vec3;
 
-template <size_t N>
-void MakeSamplesImage(const char* fileName, const std::array<std::vector<Vec2>, N>& points, int imageSize = 128)
+struct Point
 {
-    std::vector<unsigned char> pixels(imageSize * imageSize * 3, 255);
+    int classIndex = -1;
+    Vec2 v;
+};
 
-    for (int i = 0; i < N; ++i)
+#include "PaperDataSets.h"
+
+void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points, int imageSize = 128)
+{
+    // show metrics
+    std::vector<int> classCounts;
+    for (const Point& p : points)
     {
-        Vec3 RGBf = IndexToColor(i, 1.0f, 0.95f);
-        unsigned char RGBU8[3] = {
-            (unsigned char)Clamp(RGBf[0] * 256.0f, 0.0f, 255.0f),
-            (unsigned char)Clamp(RGBf[1] * 256.0f, 0.0f, 255.0f),
-            (unsigned char)Clamp(RGBf[2] * 256.0f, 0.0f, 255.0f)
-        };
+        if (p.classIndex >= classCounts.size())
+            classCounts.resize(p.classIndex + 1, 0);
+        classCounts[p.classIndex]++;
+    }
+    printf("Making %s\n%i points\n", baseFileName, (int)points.size());
+    for (int i = 0; i < classCounts.size(); ++i)
+        printf("  %i : %i\n", i, classCounts[i]);
 
-        for (const Vec2& v : points[i])
+    // make images
+    {
+        std::vector<std::vector<unsigned char>> images(classCounts.size() + 1);
+        for (auto& pixels : images)
+            pixels.resize(imageSize * imageSize * 3, 255);
+
+        for (const Point& p : points)
         {
-            int x = (int)Clamp(v[0] * float(imageSize), 0.0f, float(imageSize - 1));
-            int y = (int)Clamp(v[1] * float(imageSize), 0.0f, float(imageSize - 1));
+            Vec3 RGBf = IndexToColor(p.classIndex, 1.0f, 0.95f);
+            unsigned char RGBU8[3] = {
+                (unsigned char)Clamp(RGBf[0] * 256.0f, 0.0f, 255.0f),
+                (unsigned char)Clamp(RGBf[1] * 256.0f, 0.0f, 255.0f),
+                (unsigned char)Clamp(RGBf[2] * 256.0f, 0.0f, 255.0f)
+            };
 
-            pixels[(y * imageSize + x) * 3 + 0] = RGBU8[0];
-            pixels[(y * imageSize + x) * 3 + 1] = RGBU8[1];
-            pixels[(y * imageSize + x) * 3 + 2] = RGBU8[2];
+            int x = (int)Clamp(p.v[0] * float(imageSize), 0.0f, float(imageSize - 1));
+            int y = (int)Clamp(p.v[1] * float(imageSize), 0.0f, float(imageSize - 1));
+
+            images[0][(y * imageSize + x) * 3 + 0] = RGBU8[0];
+            images[0][(y * imageSize + x) * 3 + 1] = RGBU8[1];
+            images[0][(y * imageSize + x) * 3 + 2] = RGBU8[2];
+
+            images[p.classIndex + 1][(y * imageSize + x) * 3 + 0] = RGBU8[0];
+            images[p.classIndex + 1][(y * imageSize + x) * 3 + 1] = RGBU8[1];
+            images[p.classIndex + 1][(y * imageSize + x) * 3 + 2] = RGBU8[2];
+        }
+
+        for (int i = 0; i < classCounts.size() + 1; ++i)
+        {
+            char fileName[1024];
+            if (i == 0)
+                sprintf(fileName, "%s.png", baseFileName);
+            else
+                sprintf(fileName, "%s.%i.png", baseFileName, i - 1);
+            stbi_write_png(fileName, imageSize, imageSize, 3, images[i].data(), 0);
         }
     }
-
-    stbi_write_png(fileName, imageSize, imageSize, 3, pixels.data(), 0);
 }
 
 
@@ -53,7 +86,7 @@ struct HardLayer
 };
 
 template <size_t N>
-std::array<std::vector<Vec2>, N> MCBNHardDisk(const HardLayer(&layers_)[N], int targetCount)
+std::vector<Point> MCBNHardDisk(const HardLayer(&layers_)[N], int targetCount)
 {
     struct HardLayerInternal : public HardLayer
     {
@@ -119,14 +152,13 @@ std::array<std::vector<Vec2>, N> MCBNHardDisk(const HardLayer(&layers_)[N], int 
     }
 
     // Make the points!
-    std::array<std::vector<Vec2>, N> ret;
+    std::vector<Point> ret;
     {
         int pointsRemoved = 0;
-        int pointsAccepted = 0;
         pcg32_random_t rng = GetRNG();
 
         int failCount = 0;
-        while(pointsAccepted < targetCount && pointsRemoved < targetCount)
+        while(ret.size() < targetCount && pointsRemoved < targetCount)
         {
             // find the class which is least filled.
             float leastPercent = FLT_MAX;
@@ -144,14 +176,17 @@ std::array<std::vector<Vec2>, N> MCBNHardDisk(const HardLayer(&layers_)[N], int 
             // Calculate a random point and accept it if it satisfies all constraints
             Vec2 point = Vec2{ RandomFloat01(rng), RandomFloat01(rng) };
             bool satisfies = true;
-            int closestDistanceIndex[N];
+            std::vector<int> closestDistanceIndex(N, -1);
             for (int i = 0; i < N; ++i)
             {
-                closestDistanceIndex[i] = -1;
                 float closestDistance = FLT_MAX;
-                for (int j = 0; j < ret[i].size(); ++j)
+                for (int j = 0; j < ret.size(); ++j)
                 {
-                    const Vec2& v = ret[i][j];
+                    // Being lazy... we could handle them all at once but meh
+                    if (ret[j].classIndex != i)
+                        continue;
+
+                    const Vec2& v = ret[j].v;
                     float distance = ToroidalDistance(v, point);
                     if (distance < closestDistance)
                     {
@@ -168,9 +203,8 @@ std::array<std::vector<Vec2>, N> MCBNHardDisk(const HardLayer(&layers_)[N], int 
             if (satisfies)
             {
                 failCount = 0;
-                ret[leastPercentClass].push_back(point);
+                ret.push_back({ leastPercentClass, point });
                 layersInternal[leastPercentClass].sampleCount++;
-                pointsAccepted++;
             }
             else
             {
@@ -191,10 +225,13 @@ std::array<std::vector<Vec2>, N> MCBNHardDisk(const HardLayer(&layers_)[N], int 
                         if (thisLayerPercent < layerPercent)
                             continue;
 
-                        ret[i].erase(ret[i].begin() + closestDistanceIndex[i]);
-                        pointsAccepted--;
+                        ret.erase(ret.begin() + closestDistanceIndex[i]);
                         layersInternal[i].sampleCount--;
                         pointsRemoved++;
+
+                        // only remove one point max.
+                        // Note: closestDistanceIndex entries are invalid due to indices changing after a remove.
+                        break;
                     }
                 }
                 else if (failCount > c_failCountFatal)
@@ -204,7 +241,6 @@ std::array<std::vector<Vec2>, N> MCBNHardDisk(const HardLayer(&layers_)[N], int 
     }
 
     // unsort the layers, so they are in the same order that the user asked for
-    printf("Layers:\n");
     for (int i = 0; i < N; ++i)
     {
         for (int j = i; j < N; ++j)
@@ -214,13 +250,18 @@ std::array<std::vector<Vec2>, N> MCBNHardDisk(const HardLayer(&layers_)[N], int 
                 if (i != j)
                 {
                     std::swap(layers[i], layers[j]);
-                    std::swap(ret[i], ret[j]);
+                    std::swap(layersInternal[i], layersInternal[j]);
+                    for (Point& p : ret)
+                    {
+                        if (p.classIndex == i)
+                            p.classIndex = j;
+                        else if (p.classIndex == j)
+                            p.classIndex = 1;
+                    }
                 }
                 break;
             }
         }
-
-        printf("  %i: %i points\n", i, layersInternal[i].sampleCount);
     }
 
     return ret;
@@ -230,7 +271,12 @@ int main(int argc, char** argv)
 {
     _mkdir("out");
 
-    MakeSamplesImage("out/hard.png", MCBNHardDisk({ {0.2f}, {0.2f}, {0.2f} }, 1000));
+    MakeSamplesImage("out/hard", MCBNHardDisk({ {0.04f}, {0.02f}, {0.01f} }, 10000));
+    MakeSamplesImage("out/MCBNSPaper", GetPaperDataSet());
+
+    // NOTE: rmatrix is good. compare the rest of the functionality.
+    // ALSO: how do they calculate the target point count?
+    //MakeSamplesImage("out/hard.png", MCBNHardDisk({ {3.0f}, {2.0f}, {1.0f} }, 1000));
 
     return 0;
 }
@@ -240,9 +286,13 @@ TODO:
 - hard disk with adaptive sampling
 - soft disk implementation
 - same vs different weights
+- DFT of output images
 
 Notes:
 - not a fan of dart throwing blue noise (show why via DFT?)
 
+
+TODO: could revive other repo by forking it.
+command line param: .\DartThrowing.exe 2 3 1 1 1 0.04 0.02 0.01 4 1 1.5 > out.txt
 */
 
