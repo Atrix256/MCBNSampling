@@ -64,13 +64,12 @@ public:
         {
             for (auto& cell : col)
             {
-                for (size_t i = 0; i < cell.size(); ++i)
+                for (int i = (int)cell.size() - 1; i >= 0; --i)
                 {
                     if (cell[i].index == index)
-                    {
                         cell.erase(cell.begin() + i);
-                        return;
-                    }
+                    else if (cell[i].index > index)  // need to keep our indices valid
+                        cell[i].index--;
                 }
             }
         }

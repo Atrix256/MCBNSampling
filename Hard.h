@@ -158,9 +158,16 @@ namespace Hard
                             float layerPercent = float(layers[leastPercentClass].sampleCount) / float(layers[leastPercentClass].targetCount);
                             for (int pointIndex : conflicts)
                             {
+                                if (pointIndex < 0 || pointIndex >= ret.size())
+                                    printf("ERROR! pointIndex = %i.  ret.size() = %i\n", pointIndex, (int)ret.size());
                                 layers[ret[pointIndex].classIndex].sampleCount--;
                                 ret.erase(ret.begin() + pointIndex);
-                                grids[ret[pointIndex].classIndex].RemovePoint(pointIndex);
+
+                                // All grids need to be updated to know this point was removed.
+                                // Any index > this is invalid unless it is decrimented
+                                for (int classIndex = 0; classIndex < N; ++classIndex)
+                                    grids[classIndex].RemovePoint(pointIndex);
+
                                 pointsRemoved++;
                             }
                         }

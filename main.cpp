@@ -127,8 +127,13 @@ void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points
 int main(int argc, char** argv)
 {
     _mkdir("out");
+    char fileName[1024];
 
-    MakeSamplesImage("out/hard", Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000));
+    for (int i = 0; i < 10; ++i)
+    {
+        sprintf(fileName, "out/hard%i", i);
+        MakeSamplesImage(fileName, Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000));
+    }
     MakeSamplesImage("out/MCBNSPaper", GetPaperDataSetHard());
 
     return 0;
