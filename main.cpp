@@ -76,9 +76,14 @@ void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points
 
     // make images
     {
-        std::vector<std::vector<unsigned char>> images(classCounts.size() + 1);
+        int imageCount = (1 << classCounts.size()) - 1;
+
+        std::vector<std::vector<unsigned char>> images(imageCount);
+        std::vector<std::vector<unsigned char>> imagesbw(imageCount);
         for (auto& pixels : images)
             pixels.resize(imageSize * imageSize * 3, 255);
+        for (auto& pixels : imagesbw)
+            pixels.resize(imageSize * imageSize, 255);
 
         for (const Point& p : points)
         {
@@ -92,18 +97,29 @@ void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points
             int x = (int)Clamp(p.v[0] * float(imageSize), 0.0f, float(imageSize - 1));
             int y = (int)Clamp(p.v[1] * float(imageSize), 0.0f, float(imageSize - 1));
 
-            DrawDot(images[0].data(), imageSize, x, y, dotSize, RGBU8);
-            DrawDot(images[p.classIndex + 1].data(), imageSize, x, y, dotSize, RGBU8);
+            for (int i = 0; i < imageCount; ++i)
+            {
+                if ((i + 1) & (1 << p.classIndex))
+                {
+                    DrawDot(images[i].data(), imageSize, x, y, dotSize, RGBU8);
+                    imagesbw[i][y * imageSize + x] = 0;
+                }
+            }
         }
 
-        for (int i = 0; i < classCounts.size() + 1; ++i)
+        for (int i = 0; i < imageCount; ++i)
         {
+            std::vector<char> mask(classCounts.size()+1, 0);
+            for (int j = 0; j < classCounts.size(); ++j)
+                mask[classCounts.size() - j - 1] = (((i + 1) & (1 << j)) != 0) ? '1' : '0';
+
             char fileName[1024];
-            if (i == 0)
-                sprintf(fileName, "%s.png", baseFileName);
-            else
-                sprintf(fileName, "%s.%i.png", baseFileName, i - 1);
+
+            sprintf(fileName, "%s.%s.png", baseFileName, mask.data());
             stbi_write_png(fileName, imageSize, imageSize, 3, images[i].data(), 0);
+
+            sprintf(fileName, "%s_bw.%s.png", baseFileName, mask.data());
+            stbi_write_png(fileName, imageSize, imageSize, 1, imagesbw[i].data(), 0);
         }
     }
 }
@@ -121,6 +137,7 @@ int main(int argc, char** argv)
 TODO:
 - soft disk implementation
 - DFT of pure black/white output images
+- probably put in a grid for hard to make it faster, since you intend to share it.
 
 Paper TODO:s
 - average the DFT of 10 of results from paper, and of your results? to compare quality
