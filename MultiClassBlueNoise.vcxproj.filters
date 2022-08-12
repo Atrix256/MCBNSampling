@@ -18,6 +18,7 @@
       <Filter>OrigPaper</Filter>
     </ClInclude>
     <ClInclude Include="Hard.h" />
+    <ClInclude Include="Grid.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="pcg">

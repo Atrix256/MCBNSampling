@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PaperDataSetsHard.h"
+#include "Grid.h"
 
 namespace Hard
 {
@@ -19,8 +20,10 @@ namespace Hard
     template <size_t N>
     std::vector<Point> Make(const Layer(&layers_)[N], int targetCount)
     {
-        static const int c_failCountFatal = targetCount * 5;
-        static const int c_failCountRemove = targetCount / 2;
+        const int c_failCountFatal = targetCount * 100;
+        const int c_failCountRemove = targetCount / 10;
+
+        std::vector<Grid<100,100>> grids(N);
 
         // sort the layers from largest to smallest radius
         std::vector<LayerInternal> layers(N);
@@ -115,33 +118,20 @@ namespace Hard
                 // Calculate a random point and accept it if it satisfies all constraints
                 // Every so often, take it anyways, and destroy the conflicting points (with some more logic)
                 Vec2 point = Vec2{ RandomFloat01(rng), RandomFloat01(rng) };
-                bool satisfies = true;
                 std::vector<int> conflicts;
                 float newClassPercent = float(layers[leastPercentClass].sampleCount) / float(layers[leastPercentClass].targetCount);
                 bool considerRemoval = ((failCount + 1) % c_failCountRemove) == 0;
-                for (int pointIndex = 0; pointIndex < ret.size(); ++pointIndex)
-                {
-                    const Vec2& v = ret[pointIndex].v;
-                    int classIndex = ret[pointIndex].classIndex;
-                    float distance = ToroidalDistance(v, point);
-                    if (distance < rMatrix[classIndex][leastPercentClass])
-                    {
-                        satisfies = false;
 
-                        considerRemoval = considerRemoval &&
-                            (float(layers[classIndex].sampleCount) / float(layers[classIndex].targetCount) >= newClassPercent) &&
-                            (layers[classIndex].radius >= layers[leastPercentClass].radius);
+                // find conflicting points using the grids
+                for (int i = 0; i < N; ++i)
+                    grids[i].GetPoints(point[0], point[1], rMatrix[i][leastPercentClass], conflicts);
 
-                        if (considerRemoval)
-                            conflicts.push_back(pointIndex);
-                    }
-                }
-
-                if (satisfies)
+                if (conflicts.size() == 0)
                 {
                     failCount = 0;
                     ret.push_back({ leastPercentClass, point });
                     layers[leastPercentClass].sampleCount++;
+                    grids[leastPercentClass].AddPoint((int)ret.size() - 1, point[0], point[1]);
                 }
                 else
                 {
@@ -149,15 +139,30 @@ namespace Hard
 
                     if (considerRemoval)
                     {
-                        std::sort(conflicts.begin(), conflicts.end(), [](int a, int b) { return b < a; });
-
-                        float layerPercent = float(layers[leastPercentClass].sampleCount) / float(layers[leastPercentClass].targetCount);
+                        // see if it's safe to remove all of the points or not
                         for (int pointIndex : conflicts)
                         {
-                            layers[ret[pointIndex].classIndex].sampleCount--;
-                            ret.erase(ret.begin() + pointIndex);
+                            int classIndex = ret[pointIndex].classIndex;
+                            considerRemoval = considerRemoval &&
+                                (float(layers[classIndex].sampleCount) / float(layers[classIndex].targetCount) >= newClassPercent) &&
+                                (layers[classIndex].radius >= layers[leastPercentClass].radius);
+                            if (!considerRemoval)
+                                break;
+                        }
 
-                            pointsRemoved++;
+                        if (considerRemoval)
+                        {
+                            // sort highest to lowest so we don't invalidate the indices we are removing
+                            std::sort(conflicts.begin(), conflicts.end(), [](int a, int b) { return b < a; });
+
+                            float layerPercent = float(layers[leastPercentClass].sampleCount) / float(layers[leastPercentClass].targetCount);
+                            for (int pointIndex : conflicts)
+                            {
+                                layers[ret[pointIndex].classIndex].sampleCount--;
+                                ret.erase(ret.begin() + pointIndex);
+                                grids[ret[pointIndex].classIndex].RemovePoint(pointIndex);
+                                pointsRemoved++;
+                            }
                         }
                     }
                     else if (failCount > c_failCountFatal)
