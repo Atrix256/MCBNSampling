@@ -120,6 +120,8 @@ struct HardLayer
 template <size_t N>
 std::vector<Point> MCBNHardDisk(const HardLayer(&layers_)[N], int targetCount)
 {
+    // TODO: make sure all the variable names are good etc
+
     struct HardLayerInternal : public HardLayer
     {
         int originalIndex = 0;
@@ -208,31 +210,28 @@ std::vector<Point> MCBNHardDisk(const HardLayer(&layers_)[N], int targetCount)
             // Calculate a random point and accept it if it satisfies all constraints
             Vec2 point = Vec2{ RandomFloat01(rng), RandomFloat01(rng) };
             bool satisfies = true;
-            std::vector<int> closestDistanceIndex(N, -1);
-            for (int i = 0; i < N; ++i)
+            std::vector<int> conflicts;
+            float newClassPercent = float(layersInternal[leastPercentClass].sampleCount) / float(layersInternal[leastPercentClass].targetCount);
+            bool considerRemoval = ((failCount + 1) % c_failCountRemove) == 0;
+            for (int pointIndex = 0; pointIndex < ret.size(); ++pointIndex)
             {
-                float closestDistance = FLT_MAX;
-                for (int j = 0; j < ret.size(); ++j)
-                {
-                    // Being lazy... we could handle them all at once but meh
-                    if (ret[j].classIndex != i)
-                        continue;
-
-                    // TODO: switch to toroidal distance after things are working?
-                    const Vec2& v = ret[j].v;
-                    float distance = Distance(v, point);
-                    if (distance < closestDistance)
-                    {
-                        closestDistance = distance;
-                        closestDistanceIndex[i] = j;
-                    }
-                }
-
-                if (closestDistance < rMatrix[i][leastPercentClass])
+                // TODO: switch to toroidal distance after things are working? Note that in the notes too
+                const Vec2& v = ret[pointIndex].v;
+                int classIndex = ret[pointIndex].classIndex;
+                float distance = Distance(v, point);
+                if (distance < rMatrix[classIndex][leastPercentClass])
                 {
                     satisfies = false;
+
+                    considerRemoval = considerRemoval &&
+                        (float(layersInternal[classIndex].sampleCount) / float(layersInternal[classIndex].targetCount) >= newClassPercent) &&
+                        (layers[classIndex].radius >= layers[leastPercentClass].radius);
+
+                    if (considerRemoval)
+                        conflicts.push_back(pointIndex);
                 }
             }
+
             if (satisfies)
             {
                 failCount = 0;
@@ -243,28 +242,20 @@ std::vector<Point> MCBNHardDisk(const HardLayer(&layers_)[N], int targetCount)
             {
                 failCount++;
 
-                if ((failCount % c_failCountRemove) == 0)
+                if (considerRemoval)
                 {
+                    std::sort(conflicts.begin(), conflicts.end(), [](int a, int b) { return b < a; });
+
+                    // TODO: figure out how they map k to point count and take that code.
+                    // TODO: check out their params for how often to check for removal, and when to give up and exit.
+
                     float layerPercent = float(layersInternal[leastPercentClass].sampleCount) / float(layersInternal[leastPercentClass].targetCount);
-                    for (int i = 0; i < N; ++i)
+                    for (int pointIndex : conflicts)
                     {
-                        if (closestDistanceIndex[i] == -1)
-                            continue;
+                        layersInternal[ret[pointIndex].classIndex].sampleCount--;
+                        ret.erase(ret.begin() + pointIndex);
 
-                        if (layers[i].radius < layers[leastPercentClass].radius)
-                            continue;
-
-                        float thisLayerPercent = float(layersInternal[i].sampleCount) / float(layersInternal[i].targetCount);
-                        if (thisLayerPercent < layerPercent)
-                            continue;
-
-                        ret.erase(ret.begin() + closestDistanceIndex[i]);
-                        layersInternal[i].sampleCount--;
                         pointsRemoved++;
-
-                        // only remove one point max.
-                        // Note: closestDistanceIndex entries are invalid due to indices changing after a remove.
-                        break;
                     }
                 }
                 else if (failCount > c_failCountFatal)
@@ -307,14 +298,8 @@ int main(int argc, char** argv)
     MakeSamplesImage("out/hard", MCBNHardDisk({ {0.04f}, {0.02f}, {0.01f} }, 10000));
     MakeSamplesImage("out/MCBNSPaper", GetPaperDataSet());
 
-    // TODO: you only get like 5k points on the texture, when they get 6k.
-
-    // TODO: they do this thing where they only remove the neighbors if neighbors_all_removable. They also keep a list of all the conflicts and remove all, or not.
-
     // ALSO: how do they calculate the target point count?
     //MakeSamplesImage("out/hard.png", MCBNHardDisk({ {3.0f}, {2.0f}, {1.0f} }, 1000));
-
-    // TODO: the paper impl doesn't use toroidal distance, just regular distance!
 
     return 0;
 }
@@ -329,6 +314,8 @@ TODO:
 Notes:
 - not a fan of dart throwing blue noise (show why via DFT?)
 - Theirs is faster than mine cause they use a grid for acceleration
+- The "remove" logic is better explained as "can i put this point here anyways and remove everything in conflict?"
+- they don't use toroidal distance, just regular distance. toroidal tiles better.
 
 TODO: could revive other repo by forking it.
 command line param: .\DartThrowing.exe 2 3 1 1 1 0.04 0.02 0.01 4 1 1 > out.txt
