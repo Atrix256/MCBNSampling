@@ -121,7 +121,6 @@ std::vector<Point> MCBNHardDisk(const HardLayer(&layers_)[N], int targetCount)
 
     // TODO: make sure all the variable names are good etc
     // TODO: could put the points in a grid to speed it up. why not. could increase give up count then too.
-    // TODO: DFTs
 
     struct HardLayerInternal : public HardLayer
     {
@@ -310,11 +309,14 @@ int main(int argc, char** argv)
 }
 /*
 TODO:
-- hard disk isn't working right yet. why not?
-- hard disk with adaptive sampling
 - soft disk implementation
-- same vs different weights
-- DFT of output images
+- DFT of pure black/white output images
+
+Paper TODO:s
+- average the DFT of 10 of results from paper, and of your results? to compare quality
+ - they aren't doing removal code, and they aren't doing toroidal distance.
+ - should also compare their adaptive sampling vs yours. visual quality test. or maybe do N of them and average?
+  - which kinda leads into your spatiotemporal results actually...
 
 Notes:
 - not a fan of dart throwing blue noise (show why via DFT?)
@@ -334,5 +336,6 @@ but fill and such are totally based on trial count. fill doesn't have to be. it 
 
 TODO: could revive other repo by forking it.
 command line param: .\DartThrowing.exe 2 3 1 1 1 0.04 0.02 0.01 4 1 1 > out.txt
+- put notes above. esp, that they aren't removing and they aren't doing toroidal distance which affects DFT.
 */
 
