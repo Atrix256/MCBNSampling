@@ -20,7 +20,7 @@ namespace Hard
     template <size_t N>
     std::vector<Point> Make(const Layer(&layers_)[N], int targetCount)
     {
-        const int c_failCountFatal = targetCount * 100;
+        const int c_failCountFatal = targetCount * 10;
         const int c_failCountRemove = targetCount / 10;
 
         std::vector<Grid<100,100>> grids(N);

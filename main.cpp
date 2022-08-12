@@ -142,7 +142,6 @@ int main(int argc, char** argv)
 TODO:
 - soft disk implementation
 - DFT of pure black/white output images
-- probably put in a grid for hard to make it faster, since you intend to share it.
 
 Paper TODO:s
 - average the DFT of 10 of results from paper, and of your results? to compare quality
