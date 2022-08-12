@@ -14,9 +14,10 @@
     </ClInclude>
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="IndexToColor.h" />
-    <ClInclude Include="PaperDataSets.h">
+    <ClInclude Include="PaperDataSetsHard.h">
       <Filter>OrigPaper</Filter>
     </ClInclude>
+    <ClInclude Include="Hard.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="pcg">

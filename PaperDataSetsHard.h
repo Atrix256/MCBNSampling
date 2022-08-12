@@ -1,6 +1,6 @@
 #pragma once
 
-inline std::vector<Point> GetPaperDataSet()
+inline std::vector<Point> GetPaperDataSetHard()
 {
     static const Point points[] =
     {

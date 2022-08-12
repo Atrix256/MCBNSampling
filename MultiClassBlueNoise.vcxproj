@@ -143,9 +143,10 @@
     <ClCompile Include="pcg\pcg_basic.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Hard.h" />
     <ClInclude Include="IndexToColor.h" />
     <ClInclude Include="MathUtils.h" />
-    <ClInclude Include="PaperDataSets.h" />
+    <ClInclude Include="PaperDataSetsHard.h" />
     <ClInclude Include="pcg\pcg_basic.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="stb_image_write.h" />
