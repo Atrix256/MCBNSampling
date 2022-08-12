@@ -115,7 +115,7 @@ void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points
 
             char fileName[1024];
 
-            sprintf(fileName, "%s.%s.png", baseFileName, mask.data());
+            sprintf(fileName, "%s_color.%s.png", baseFileName, mask.data());
             stbi_write_png(fileName, imageSize, imageSize, 3, images[i].data(), 0);
 
             sprintf(fileName, "%s_bw.%s.png", baseFileName, mask.data());
