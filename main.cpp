@@ -108,10 +108,6 @@ void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points
     }
 }
 
-
-static const int c_failCountFatal = 1000;
-static const int c_failCountRemove = 100;
-
 struct HardLayer
 {
     float radius = 0.0f;
@@ -120,7 +116,12 @@ struct HardLayer
 template <size_t N>
 std::vector<Point> MCBNHardDisk(const HardLayer(&layers_)[N], int targetCount)
 {
+    static const int c_failCountFatal = targetCount * 5;
+    static const int c_failCountRemove = targetCount / 2;
+
     // TODO: make sure all the variable names are good etc
+    // TODO: could put the points in a grid to speed it up. why not. could increase give up count then too.
+    // TODO: DFTs
 
     struct HardLayerInternal : public HardLayer
     {
@@ -191,9 +192,18 @@ std::vector<Point> MCBNHardDisk(const HardLayer(&layers_)[N], int targetCount)
         int pointsRemoved = 0;
         pcg32_random_t rng = GetRNG();
 
+        int lastPercent = -1;
         int failCount = 0;
         while(ret.size() < targetCount && pointsRemoved < targetCount)
         {
+            // TODO: better progress reporting, with estimate
+            int percent = int(100.0f * std::max(float(ret.size()) / float(targetCount), float(pointsRemoved) / float(targetCount)));
+            if (percent != lastPercent)
+            {
+                printf("\r%i%%", percent);
+                lastPercent = percent;
+            }
+
             // find the class which is least filled.
             float leastPercent = FLT_MAX;
             int leastPercentClass = -1;
@@ -213,12 +223,12 @@ std::vector<Point> MCBNHardDisk(const HardLayer(&layers_)[N], int targetCount)
             std::vector<int> conflicts;
             float newClassPercent = float(layersInternal[leastPercentClass].sampleCount) / float(layersInternal[leastPercentClass].targetCount);
             bool considerRemoval = ((failCount + 1) % c_failCountRemove) == 0;
+
             for (int pointIndex = 0; pointIndex < ret.size(); ++pointIndex)
             {
-                // TODO: switch to toroidal distance after things are working? Note that in the notes too
                 const Vec2& v = ret[pointIndex].v;
                 int classIndex = ret[pointIndex].classIndex;
-                float distance = Distance(v, point);
+                float distance = ToroidalDistance(v, point);
                 if (distance < rMatrix[classIndex][leastPercentClass])
                 {
                     satisfies = false;
@@ -246,9 +256,6 @@ std::vector<Point> MCBNHardDisk(const HardLayer(&layers_)[N], int targetCount)
                 {
                     std::sort(conflicts.begin(), conflicts.end(), [](int a, int b) { return b < a; });
 
-                    // TODO: figure out how they map k to point count and take that code.
-                    // TODO: check out their params for how often to check for removal, and when to give up and exit.
-
                     float layerPercent = float(layersInternal[leastPercentClass].sampleCount) / float(layersInternal[leastPercentClass].targetCount);
                     for (int pointIndex : conflicts)
                     {
@@ -263,6 +270,7 @@ std::vector<Point> MCBNHardDisk(const HardLayer(&layers_)[N], int targetCount)
             }
         }
     }
+    printf("\r100%%\n");
 
     // unsort the layers, so they are in the same order that the user asked for
     for (int i = 0; i < N; ++i)
@@ -298,9 +306,6 @@ int main(int argc, char** argv)
     MakeSamplesImage("out/hard", MCBNHardDisk({ {0.04f}, {0.02f}, {0.01f} }, 10000));
     MakeSamplesImage("out/MCBNSPaper", GetPaperDataSet());
 
-    // ALSO: how do they calculate the target point count?
-    //MakeSamplesImage("out/hard.png", MCBNHardDisk({ {3.0f}, {2.0f}, {1.0f} }, 1000));
-
     return 0;
 }
 /*
@@ -316,6 +321,16 @@ Notes:
 - Theirs is faster than mine cause they use a grid for acceleration
 - The "remove" logic is better explained as "can i put this point here anyways and remove everything in conflict?"
 - they don't use toroidal distance, just regular distance. toroidal tiles better.
+- NGL, the other code isn't easy to read and i saw weird things like an empty priority group added to the list, and the number of priority groups affecting sample calculations.
+ - so, some minor bugs seemingly :shrug:
+ - hard to know what parameters to give, and the readme that gives an example command line argument is out of date
+ - the params it specifies don't cause removal to happen.
+
+NOTE:num trial calculation: (hard disk)
+amplification = sqrt(2) / minimum r matrix value
+cellsize = 1 / amplification
+total trials = k_number * amplification * amplification
+but fill and such are totally based on trial count. fill doesn't have to be. it could be percent of total, and compare that vs r matrix or something?
 
 TODO: could revive other repo by forking it.
 command line param: .\DartThrowing.exe 2 3 1 1 1 0.04 0.02 0.01 4 1 1 > out.txt
