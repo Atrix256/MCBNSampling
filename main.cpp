@@ -75,6 +75,55 @@ void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points
         printf("  %i : %i\n", i, classCounts[i]);
     //printf("min/max = (%f, %f) - (%f, %f)\n", minX, minY, maxX, maxY);
 
+    // Make text files
+    {
+        // text file
+        {
+            char fileName[1024];
+            sprintf(fileName, "%s.txt", baseFileName);
+            FILE* file = nullptr;
+            fopen_s(&file, fileName, "wb");
+            for (const Point& p : points)
+                fprintf(file, "%i %f %f\n", p.classIndex, p.v[0], p.v[1]);
+            fclose(file);
+        }
+
+        // csv file
+        {
+            char fileName[1024];
+            sprintf(fileName, "%s.csv", baseFileName);
+            FILE* file = nullptr;
+            fopen_s(&file, fileName, "wb");
+            fprintf(file, "\"Class\",\"x\",\"y\"\n");
+            for (const Point& p : points)
+                fprintf(file, "\"%i\",\"%f\",\"%f\"\n", p.classIndex, p.v[0], p.v[1]);
+            fclose(file);
+        }
+
+        // .h file
+        {
+            char fileName[1024];
+            sprintf(fileName, "%s.h", baseFileName);
+            FILE* file = nullptr;
+            fopen_s(&file, fileName, "wb");
+            fprintf(file,
+                "struct MultiClassPoint\n"
+                "{\n"
+                "    int classIndex;\n"
+                "    float x;\n"
+                "    float y;\n"
+                "};\n"
+                "\n"
+                "MultiClassPoint points[] =\n"
+                "{\n"
+            );
+            for (const Point& p : points)
+                fprintf(file, "    { %i, %ff, %ff },\n", p.classIndex, p.v[0], p.v[1]);
+            fprintf(file, "};\n");
+            fclose(file);
+        }
+    }
+
     // make images
     {
         int imageCount = (1 << classCounts.size()) - 1;
@@ -145,11 +194,10 @@ int main(int argc, char** argv)
 }
 /*
 TODO:
-- soft disk implementation
 - DFT of pure black/white output images
 - make it where the random numbers are random pixel locations, instead of floating point. so it's on a discrete domain
+- could do the density map feature. might help w/ your own code.
 - maybe wait to put this out until your paper so you don't get scooped? (ha! but ... shrug)
-- probably spit out the points as text files, like the other repo does
 
 Paper TODO:s
 - average the DFT of 10 of results from paper, and of your results? to compare quality
