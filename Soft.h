@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Grid.h"
+
 namespace Soft
 {
     struct Layer
@@ -13,6 +15,8 @@ namespace Soft
     template <size_t N>
     std::vector<Point> Make(const int(&counts)[N])
     {
+        std::vector<Grid<100, 100>> grids(N);
+
         // make the layer data
         int totalCount = 0;
         std::vector<Layer> layers(N);
@@ -72,6 +76,7 @@ namespace Soft
         {
             pcg32_random_t rng = GetRNG();
 
+            std::vector<float> toroidalDistancesSq; // out here to avoid allocs
             int lastPercent = -1;
             for (int pointIndex = 0; pointIndex < totalCount; ++pointIndex)
             {
@@ -104,16 +109,17 @@ namespace Soft
                 {
                     Vec2 candidate = Vec2{ RandomFloat01(rng), RandomFloat01(rng) };
 
-                    // TODO: accel this with grids and a max search radius based on sigma
+                    // Get points within 3 sigmas
                     float score = 0.0f;
-                    for (const Point& p : ret)
+                    for (int classIndex = 0; classIndex < N; ++classIndex)
                     {
-                        float r = rMatrix[leastPercentClass][p.classIndex];
-                        float sigma = 0.25f * r;
-                        float tdsq = ToroidalDistanceSq(p.v, candidate);
-                        score += exp(-(tdsq) / (2.0f * sigma * sigma));
+                        float sigma = 0.25f * rMatrix[leastPercentClass][classIndex];
+                        grids[classIndex].GetPointToroidalDistancesSq(candidate[0], candidate[1], 3.0f * sigma, toroidalDistancesSq, false);
+                        for (float tdsq : toroidalDistancesSq)
+                            score += exp(-(tdsq) / (2.0f * sigma * sigma));
                     }
 
+                    // if this score is the best we've seen so far, take it as the new best
                     if (score < bestScore)
                     {
                         bestCandidate = candidate;
@@ -121,13 +127,11 @@ namespace Soft
                     }
                 }
 
+                // add the point
                 ret.push_back({ leastPercentClass, {bestCandidate} });
                 layers[leastPercentClass].sampleCount++;
+                grids[leastPercentClass].AddPoint((int)ret.size() - 1, bestCandidate[0], bestCandidate[1]);
             }
-
-            // TODO: continue and finish this. mitchell's best candidate with an energy field
-            // energy field has sigma of 1/4 of the r matrix value.
-            // how many candidates? what was the sigma again? we could accel this with a grid if we have a max distance that energy can travel
         }
         printf("\r100%%\n");
 

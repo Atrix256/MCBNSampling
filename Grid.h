@@ -50,6 +50,34 @@ public:
         }
     }
 
+    void GetPointToroidalDistancesSq(float x, float y, float radius, std::vector<float>& results, bool append = true) const
+    {
+        if (!append)
+            results.clear();
+
+        int mincx = XToCellX(x - radius);
+        int maxcx = XToCellX(x + radius);
+        int mincy = YToCellY(y - radius);
+        int maxcy = YToCellY(y + radius);
+
+        for (int iy = mincy; iy <= maxcy; ++iy)
+        {
+            int cy = (iy + CELLSY) % CELLSY;
+
+            for (int ix = mincx; ix <= maxcx; ++ix)
+            {
+                int cx = (ix + CELLSX) % CELLSX;
+
+                for (const auto& p : m_cells[cx][cy])
+                {
+                    float toroidalDistanceSq = ToroidalDistanceSq(Vec2{ x, y }, Vec2{ p.x, p.y });
+                    if (toroidalDistanceSq < radius * radius)
+                        results.push_back(toroidalDistanceSq);
+                }
+            }
+        }
+    }
+
     void AddPoint(int index, float x, float y)
     {
         int cx = XToCellX(x);

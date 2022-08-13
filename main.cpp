@@ -129,7 +129,7 @@ int main(int argc, char** argv)
 {
     _mkdir("out");
 
-    MakeSamplesImage("out/soft", Soft::Make({ 10, 100, 400 })); // TODO: times 10 after you accel with a grid
+    MakeSamplesImage("out/soft", Soft::Make({ 100, 1000, 4000 }));
 
 #if 0
     for (int i = 0; i < 10; ++i)
@@ -149,6 +149,7 @@ TODO:
 - DFT of pure black/white output images
 - make it where the random numbers are random pixel locations, instead of floating point. so it's on a discrete domain
 - maybe wait to put this out until your paper so you don't get scooped? (ha! but ... shrug)
+- probably spit out the points as text files, like the other repo does
 
 Paper TODO:s
 - average the DFT of 10 of results from paper, and of your results? to compare quality
