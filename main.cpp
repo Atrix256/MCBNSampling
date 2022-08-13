@@ -231,6 +231,8 @@ TODO:
 - DFT of pure black/white output images
 - could do the density map feature. might help w/ your own code.
 - maybe wait to put this out until your paper so you don't get scooped? (ha! but ... shrug)
+- after this, wasn't there another paper you needed to look at?
+ - properties of jointly blue noise masks...
 
 Paper TODO:s
 - average the DFT of 10 of results from paper, and of your results? to compare quality
