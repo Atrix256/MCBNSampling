@@ -220,7 +220,7 @@ int main(int argc, char** argv)
     {
         char fileName[1024];
         sprintf(fileName, "out/hard%i", i);
-        MakeSamplesImage(fileName, Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000));
+        MakeSamplesImage(fileName, Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000, RNGContinuous::Generate));
     }
     MakeSamplesImage("out/MCBNSPaper", GetPaperDataSetHard());
 
