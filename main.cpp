@@ -22,6 +22,7 @@ struct Point
 };
 
 #include "Hard.h"
+#include "Soft.h"
 
 void DrawDot(unsigned char* pixels, int imageSize, int x, int y, float radius, const unsigned char (&RGB)[3])
 {
@@ -127,14 +128,18 @@ void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points
 int main(int argc, char** argv)
 {
     _mkdir("out");
-    char fileName[1024];
 
+    MakeSamplesImage("out/soft", Soft::Make({ 10, 100, 400 })); // TODO: times 10 after you accel with a grid
+
+#if 0
     for (int i = 0; i < 10; ++i)
     {
+        char fileName[1024];
         sprintf(fileName, "out/hard%i", i);
         MakeSamplesImage(fileName, Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000));
     }
     MakeSamplesImage("out/MCBNSPaper", GetPaperDataSetHard());
+#endif
 
     return 0;
 }
@@ -142,6 +147,8 @@ int main(int argc, char** argv)
 TODO:
 - soft disk implementation
 - DFT of pure black/white output images
+- make it where the random numbers are random pixel locations, instead of floating point. so it's on a discrete domain
+- maybe wait to put this out until your paper so you don't get scooped? (ha! but ... shrug)
 
 Paper TODO:s
 - average the DFT of 10 of results from paper, and of your results? to compare quality

@@ -8,17 +8,13 @@ namespace Hard
     struct Layer
     {
         float radius = 0.0f;
-    };
-
-    struct LayerInternal : public Layer
-    {
         int originalIndex = 0;
         int sampleCount = 0;
         int targetCount = 0;
     };
 
     template <size_t N>
-    std::vector<Point> Make(const Layer(&layers_)[N], int targetCount)
+    std::vector<Point> Make(const float(&radii)[N], int targetCount)
     {
         const int c_failCountFatal = targetCount * 10;
         const int c_failCountRemove = targetCount / 10;
@@ -26,17 +22,17 @@ namespace Hard
         std::vector<Grid<100,100>> grids(N);
 
         // sort the layers from largest to smallest radius
-        std::vector<LayerInternal> layers(N);
+        std::vector<Layer> layers(N);
         for (int i = 0; i < N; ++i)
         {
-            layers[i].radius = layers_[i].radius;
+            layers[i].radius = radii[i];
             layers[i].originalIndex = i;
         }
 
         std::sort(
             layers.begin(),
             layers.end(),
-            [](const LayerInternal& A, const LayerInternal& B)
+            [](const Layer& A, const Layer& B)
             {
                 return A.radius > B.radius;
             }
@@ -45,7 +41,7 @@ namespace Hard
         // Calculate the targetCount for each layer.
         {
             float sumInverseRadiusSquared = 0.0f;
-            for (const LayerInternal& layer : layers)
+            for (const Layer& layer : layers)
                 sumInverseRadiusSquared += 1.0f / (layer.radius * layer.radius);
             for (int i = 0; i < N; ++i)
             {

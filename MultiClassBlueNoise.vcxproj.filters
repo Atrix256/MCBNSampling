@@ -19,6 +19,7 @@
     </ClInclude>
     <ClInclude Include="Hard.h" />
     <ClInclude Include="Grid.h" />
+    <ClInclude Include="Soft.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="pcg">

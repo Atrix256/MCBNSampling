@@ -150,6 +150,7 @@
     <ClInclude Include="PaperDataSetsHard.h" />
     <ClInclude Include="pcg\pcg_basic.h" />
     <ClInclude Include="Random.h" />
+    <ClInclude Include="Soft.h" />
     <ClInclude Include="stb_image_write.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

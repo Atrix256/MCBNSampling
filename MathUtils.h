@@ -2,6 +2,8 @@
 
 #include <array>
 
+static const float c_pi = 3.14159265359f;
+
 float Clamp(float value, float themin, float themax)
 {
     if (value <= themin)
