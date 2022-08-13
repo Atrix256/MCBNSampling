@@ -13,8 +13,8 @@ namespace Hard
         int targetCount = 0;
     };
 
-    template <size_t N>
-    std::vector<Point> Make(const float(&radii)[N], int targetCount)
+    template <size_t N, typename RNG>
+    std::vector<Point> Make(const float(&radii)[N], int targetCount, RNG& rng)
     {
         const int c_failCountFatal = targetCount * 10;
         const int c_failCountRemove = targetCount / 10;
@@ -85,7 +85,6 @@ namespace Hard
         // Make the points!
         std::vector<Point> ret;
         {
-            pcg32_random_t rng = GetRNG();
             int pointsRemoved = 0;
             int lastPercent = -1;
             int failCount = 0;
@@ -113,7 +112,7 @@ namespace Hard
 
                 // Calculate a random point and accept it if it satisfies all constraints
                 // Every so often, take it anyways, and destroy the conflicting points (with some more logic)
-                Vec2 point = Vec2{ RandomFloat01(rng), RandomFloat01(rng) };
+                Vec2 point = rng();
                 std::vector<int> conflicts;
                 float newClassPercent = float(layers[leastPercentClass].sampleCount) / float(layers[leastPercentClass].targetCount);
                 bool considerRemoval = ((failCount + 1) % c_failCountRemove) == 0;

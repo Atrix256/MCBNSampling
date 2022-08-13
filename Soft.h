@@ -12,8 +12,8 @@ namespace Soft
         int targetCount = 0;
     };
 
-    template <size_t N>
-    std::vector<Point> Make(const int(&counts)[N])
+    template <size_t N, typename RNG>
+    std::vector<Point> Make(const int(&counts)[N], RNG& rng)
     {
         std::vector<Grid<100, 100>> grids(N);
 
@@ -74,8 +74,6 @@ namespace Soft
         // Make the points!
         std::vector<Point> ret;
         {
-            pcg32_random_t rng = GetRNG();
-
             std::vector<float> toroidalDistancesSq; // out here to avoid allocs
             int lastPercent = -1;
             for (int pointIndex = 0; pointIndex < totalCount; ++pointIndex)
@@ -107,7 +105,7 @@ namespace Soft
                 int candidateCount = int(ret.size()) + 1;
                 for (int i = 0; i < candidateCount; ++i)
                 {
-                    Vec2 candidate = Vec2{ RandomFloat01(rng), RandomFloat01(rng) };
+                    Vec2 candidate = rng();
 
                     // Get points within 3 sigmas
                     float score = 0.0f;

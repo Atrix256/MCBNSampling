@@ -174,13 +174,48 @@ void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points
     }
 }
 
+struct RNGContinuous
+{
+    static Vec2 Generate()
+    {
+        static pcg32_random_t rng = GetRNG();
+        return Vec2
+        {
+            RandomFloat01(rng),
+            RandomFloat01(rng)
+        };
+    }
+};
+
+template <size_t X, size_t Y>
+struct RNGDiscrete
+{
+    static Vec2 Generate()
+    {
+        static pcg32_random_t rng = GetRNG();
+        Vec2 ret = Vec2
+        {
+            RandomFloat01(rng),
+            RandomFloat01(rng)
+        };
+
+        ret[0] = std::floor(ret[0] * float(X - 1) + 0.5f) / float(X); // TODO: verify this is correct when you are less tired
+        ret[1] = std::floor(ret[1] * float(Y - 1) + 0.5f) / float(Y);
+
+        return ret;
+    }
+};
+
 int main(int argc, char** argv)
 {
     _mkdir("out");
 
-    MakeSamplesImage("out/soft", Soft::Make({ 100, 1000, 4000 }));
+    MakeSamplesImage("out/softC", Soft::Make({ 100, 1000, 4000 }, RNGContinuous::Generate));
 
-#if 0
+    MakeSamplesImage("out/soft100x100", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<100,100>::Generate));
+
+    MakeSamplesImage("out/soft256x256", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<256, 256>::Generate));
+
     for (int i = 0; i < 10; ++i)
     {
         char fileName[1024];
@@ -188,14 +223,12 @@ int main(int argc, char** argv)
         MakeSamplesImage(fileName, Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000));
     }
     MakeSamplesImage("out/MCBNSPaper", GetPaperDataSetHard());
-#endif
 
     return 0;
 }
 /*
 TODO:
 - DFT of pure black/white output images
-- make it where the random numbers are random pixel locations, instead of floating point. so it's on a discrete domain
 - could do the density map feature. might help w/ your own code.
 - maybe wait to put this out until your paper so you don't get scooped? (ha! but ... shrug)
 
