@@ -225,6 +225,27 @@ Vec2 RNGDiscrete()
     return ret;
 }
 
+std::vector<Point> GetPointsFromTextFile(const char* fileName)
+{
+    FILE* file = nullptr;
+    fopen_s(&file, fileName, "rt");
+
+    std::vector<Point> ret;
+    while (true)
+    {
+        int a;
+        float b, c;
+        if (fscanf(file, "%i %f %f", &a, &b, &c) != 3)
+            break;
+
+        ret.push_back({ a, {b, c} });
+    }
+
+    fclose(file);
+
+    return ret;
+}
+
 int main(int argc, char** argv)
 {
     _mkdir("out");
@@ -243,7 +264,15 @@ int main(int argc, char** argv)
         MakeSamplesImage(fileName, Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000, RNGContinuous, true));
     }
     MakeSamplesImage("out/hardF", Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000, RNGContinuous, false));
-    MakeSamplesImage("out/MCBNSPaper", GetPaperDataSetHard());
+
+    for (int i = 0; i < 10; ++i)
+    {
+        char fileNameSrc[1024];
+        char fileNameDest[1024];
+        sprintf(fileNameSrc, "paperdata/Hard%i.txt", i);
+        sprintf(fileNameDest, "out/MCBNSPaperHard%i", i);
+        MakeSamplesImage(fileNameDest, GetPointsFromTextFile(fileNameSrc));
+    }
 
     return 0;
 }
@@ -255,6 +284,7 @@ TODO:
 - maybe wait to put this out until your paper so you don't get scooped? (ha! but ... shrug)
 - after this, wasn't there another paper you needed to look at?
  - properties of jointly blue noise masks...
+! oddly, the other paper makes noise that looks good tiled. how? it tiles better than your toroidal noise. maybe 3 sigmas isn't enough? i dunno.
 
 Paper TODO:s
 - average the DFT of 10 of results from paper, and of your results? to compare quality

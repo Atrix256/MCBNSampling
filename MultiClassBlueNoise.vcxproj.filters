@@ -14,9 +14,6 @@
     </ClInclude>
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="IndexToColor.h" />
-    <ClInclude Include="PaperDataSetsHard.h">
-      <Filter>OrigPaper</Filter>
-    </ClInclude>
     <ClInclude Include="Hard.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="Soft.h" />
@@ -25,8 +22,40 @@
     <Filter Include="pcg">
       <UniqueIdentifier>{4a8d244c-8646-4ad4-9caf-8c4d9a69c093}</UniqueIdentifier>
     </Filter>
-    <Filter Include="OrigPaper">
+    <Filter Include="PaperData">
       <UniqueIdentifier>{4d572751-8190-40ff-b5f5-931647ef6d37}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="paperdata\Hard0.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\Hard1.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\Hard2.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\Hard3.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\Hard4.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\Hard5.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\Hard6.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\Hard7.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\Hard8.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\Hard9.txt">
+      <Filter>PaperData</Filter>
+    </Text>
   </ItemGroup>
 </Project>
