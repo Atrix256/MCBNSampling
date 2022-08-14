@@ -242,25 +242,58 @@ std::vector<Point> GetPointsFromTextFile(const char* fileName)
     return ret;
 }
 
+void DoDFTs(const char* fileNamePattern, int numClasses)
+{
+    int imagePatterns = (1 << numClasses) - 1;
+    std::vector<char> pattern(numClasses + 1, 0);
+    for (int imageIndex = 0; imageIndex < imagePatterns; ++imageIndex)
+    {
+        for (int classIndex = 0; classIndex < numClasses; ++classIndex)
+            pattern[numClasses - classIndex - 1] = ((1 << classIndex) & (imageIndex + 1)) ? '1' : '0';
+
+        char fileName[1204];
+        sprintf(fileName, fileNamePattern, pattern.data());
+
+        char buffer[1024];
+        sprintf(buffer, "python MultiDFT.py %s 10 0 5", fileName);
+        system(buffer);
+    }
+}
+
 int main(int argc, char** argv)
 {
     _mkdir("out");
 
-    MakeSamplesImage("out/softCT", Soft::Make({ 100, 1000, 4000 }, RNGContinuous, true));
-    //MakeSamplesImage("out/softCF", Soft::Make({ 100, 1000, 4000 }, RNGContinuous, false));
-
-    //MakeSamplesImage("out/soft10x10", Soft::Make({ 5, 10, 20 }, RNGDiscrete<10, 10>, true));
-    //MakeSamplesImage("out/soft100x100", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<100,100>, true));
-    MakeSamplesImage("out/soft256x256", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<256, 256>, true));
-
+    // Soft images
     for (int i = 0; i < 10; ++i)
     {
         char fileName[1024];
-        sprintf(fileName, "out/hardT%i", i);
+        sprintf(fileName, "out/Soft%i", i);
+        MakeSamplesImage(fileName, Soft::Make({ 100, 1000, 4000 }, RNGContinuous, true));
+    }
+    DoDFTs("out/Soft%%i_bw.%s.png", 3);
+
+    // Soft non toroidal
+    //MakeSamplesImage("out/softCF", Soft::Make({ 100, 1000, 4000 }, RNGContinuous, false));
+
+    // Soft discrete domain tests
+    //MakeSamplesImage("out/soft10x10", Soft::Make({ 5, 10, 20 }, RNGDiscrete<10, 10>, true));
+    //MakeSamplesImage("out/soft100x100", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<100,100>, true));
+    //MakeSamplesImage("out/soft256x256", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<256, 256>, true));
+
+    // Hard images
+    for (int i = 0; i < 10; ++i)
+    {
+        char fileName[1024];
+        sprintf(fileName, "out/Hard%i", i);
         MakeSamplesImage(fileName, Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000, RNGContinuous, true));
     }
+    DoDFTs("out/Hard%%i_bw.%s.png", 3);
+
+    // Hard non toroidal
     //MakeSamplesImage("out/hardF", Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000, RNGContinuous, false));
 
+    // Hard sets from paper
     for (int i = 0; i < 10; ++i)
     {
         char fileNameSrc[1024];
@@ -269,13 +302,13 @@ int main(int argc, char** argv)
         sprintf(fileNameDest, "out/MCBNSPaperHard%i", i);
         MakeSamplesImage(fileNameDest, GetPointsFromTextFile(fileNameSrc));
     }
+    DoDFTs("out/MCBNSPaperHard%%i_bw.%s.png", 3);
 
     return 0;
 }
 /*
 TODO: before a blog post
-- DFT of pure black/white output images. need them all to be in the same range. maybe give a file pattern like *bw.*.png?
-- could do the density map feature. might help w/ your own code.
+- do the "adaptive sampling" feature
  - probably copy hard.h into a hard adaptive.h or something
 
  
