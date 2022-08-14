@@ -289,6 +289,10 @@ Paper TODO:s
   - which kinda leads into your spatiotemporal results actually...
 - could make this spatiotemporal too probably... just add the energy function on z axis
 
+Blog post notes:
+"Kif you call those mixed nuts? i see two almonds touching!"
+- enter multi class blue noise.
+
 Notes:
 - not a fan of dart throwing blue noise (show why via DFT?)
 - Theirs is faster than mine cause they use a grid for acceleration
