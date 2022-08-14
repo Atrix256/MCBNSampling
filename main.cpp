@@ -274,7 +274,6 @@ int main(int argc, char** argv)
 }
 /*
 TODO:
-- for the grid getting conflicts, could start at the center cell and increase radius by 1 each time. should be faster later on.
 - DFT of pure black/white output images. need them all to be in the same range. maybe give a file pattern like *bw.*.png?
 - could do the density map feature. might help w/ your own code.
  - probably copy hard.h into a hard adaptive.h or something

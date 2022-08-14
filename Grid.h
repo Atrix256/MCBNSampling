@@ -24,10 +24,9 @@ public:
     }
 
     template <bool TOROIDAL>
-    void GetPoints(float x, float y, float radius, std::vector<int>& results, bool append = true) const
+    std::vector<int> GetPoints(float x, float y, float radius, bool stopAfterFirst) const
     {
-        if (!append)
-            results.clear();
+        std::vector<int> results;
 
         int mincx = XToCellX(x - radius);
         int maxcx = XToCellX(x + radius);
@@ -55,16 +54,25 @@ public:
                     if (TOROIDAL)
                     {
                         if (ToroidalDistanceSq(Vec2{ x, y }, Vec2{ p.x, p.y }) < radius * radius)
+                        {
                             results.push_back(p.index);
+                            if (stopAfterFirst)
+                                return results;
+                        }
                     }
                     else
                     {
                         if (DistanceSq(Vec2{ x, y }, Vec2{ p.x, p.y }) < radius * radius)
+                        {
                             results.push_back(p.index);
+                            if (stopAfterFirst)
+                                return results;
+                        }
                     }
                 }
             }
         }
+        return results;
     }
 
     template <bool TOROIDAL>

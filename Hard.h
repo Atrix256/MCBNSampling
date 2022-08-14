@@ -117,12 +117,14 @@ namespace Hard
                 bool considerRemoval = ((failCount + 1) % c_failCountRemove) == 0;
 
                 // find conflicting points using the grids
+                // If we are considering removal, we want all conflicts
+                // otherwise we only need 1 point to know that there was a conflict
                 for (int i = 0; i < N; ++i)
                 {
                     if (toroidal)
-                        grids[i].GetPoints<true>(point[0], point[1], rMatrix[i][leastPercentClass], conflicts);
+                        conflicts = grids[i].GetPoints<true>(point[0], point[1], rMatrix[i][leastPercentClass], !considerRemoval);
                     else
-                        grids[i].GetPoints<false>(point[0], point[1], rMatrix[i][leastPercentClass], conflicts);
+                        conflicts = grids[i].GetPoints<false>(point[0], point[1], rMatrix[i][leastPercentClass], !considerRemoval);
                 }
 
                 if (conflicts.size() == 0)
