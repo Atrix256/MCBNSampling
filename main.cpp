@@ -273,14 +273,16 @@ int main(int argc, char** argv)
     return 0;
 }
 /*
-TODO:
+TODO: before a blog post
 - DFT of pure black/white output images. need them all to be in the same range. maybe give a file pattern like *bw.*.png?
 - could do the density map feature. might help w/ your own code.
  - probably copy hard.h into a hard adaptive.h or something
+
+ 
+NEXT:
 - maybe wait to put this out until your paper so you don't get scooped? (ha! but ... shrug)
 - after this, wasn't there another paper you needed to look at?
  - properties of jointly blue noise masks...
-! oddly, the other paper makes noise that looks good tiled. how? it tiles better than your toroidal noise. maybe 3 sigmas isn't enough? i dunno.
 
 Paper TODO:s
 - average the DFT of 10 of results from paper, and of your results? to compare quality
