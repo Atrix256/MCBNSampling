@@ -122,9 +122,9 @@ namespace Hard
                 for (int i = 0; i < N; ++i)
                 {
                     if (toroidal)
-                        conflicts = grids[i].GetPoints<true>(point[0], point[1], rMatrix[i][leastPercentClass], !considerRemoval);
+                        grids[i].GetPoints<true>(point[0], point[1], rMatrix[i][leastPercentClass], conflicts, !considerRemoval, true);
                     else
-                        conflicts = grids[i].GetPoints<false>(point[0], point[1], rMatrix[i][leastPercentClass], !considerRemoval);
+                        grids[i].GetPoints<false>(point[0], point[1], rMatrix[i][leastPercentClass], conflicts, !considerRemoval, true);
                 }
 
                 if (conflicts.size() == 0)
