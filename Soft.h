@@ -13,7 +13,7 @@ namespace Soft
     };
 
     template <size_t N, typename RNG>
-    std::vector<Point> Make(const int(&counts)[N], RNG& rng)
+    std::vector<Point> Make(const int(&counts)[N], RNG& rng, bool toroidal)
     {
         std::vector<Grid<100, 100>> grids(N);
 
@@ -74,7 +74,7 @@ namespace Soft
         // Make the points!
         std::vector<Point> ret;
         {
-            std::vector<float> toroidalDistancesSq; // out here to avoid allocs
+            std::vector<float> distances; // out here to avoid allocs
             int lastPercent = -1;
             for (int pointIndex = 0; pointIndex < totalCount; ++pointIndex)
             {
@@ -102,7 +102,7 @@ namespace Soft
                 float bestScore = FLT_MAX;
 
                 // TODO: is this the best strategy here? a k of 1 i mean
-                int candidateCount = int(ret.size()) + 1;
+                int candidateCount = int(ret.size()) * 5 + 1;
                 for (int i = 0; i < candidateCount; ++i)
                 {
                     Vec2 candidate = rng();
@@ -112,9 +112,12 @@ namespace Soft
                     for (int classIndex = 0; classIndex < N; ++classIndex)
                     {
                         float sigma = 0.25f * rMatrix[leastPercentClass][classIndex];
-                        grids[classIndex].GetPointToroidalDistancesSq(candidate[0], candidate[1], 3.0f * sigma, toroidalDistancesSq, false);
-                        for (float tdsq : toroidalDistancesSq)
-                            score += exp(-(tdsq) / (2.0f * sigma * sigma));
+                        if (toroidal)
+                            grids[classIndex].GetPointDistancesSq<true>(candidate[0], candidate[1], 3.0f * sigma, distances, false);
+                        else
+                            grids[classIndex].GetPointDistancesSq<false>(candidate[0], candidate[1], 3.0f * sigma, distances, false);
+                        for (float distSq : distances)
+                            score += exp(-(distSq) / (2.0f * sigma * sigma));
                     }
 
                     // if this score is the best we've seen so far, take it as the new best

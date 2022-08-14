@@ -171,6 +171,31 @@ void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points
             sprintf(fileName, "%s_bw.%s.png", baseFileName, mask.data());
             stbi_write_png(fileName, imageSize, imageSize, 1, imagesbw[i].data(), 0);
         }
+
+        // make a tiled image
+        {
+            char fileName[1024];
+
+            std::vector<unsigned char> tiled(imageSize * imageSize * 3 * 9, 255);
+            unsigned char* dest = tiled.data();
+
+            for (int i = 0; i < imageSize * 3; ++i)
+            {
+                const unsigned char* src = &images[images.size() - 1][(i % imageSize) * imageSize * 3];
+
+                memcpy(dest, src, imageSize * 3);
+                dest += imageSize * 3;
+
+                memcpy(dest, src, imageSize * 3);
+                dest += imageSize * 3;
+
+                memcpy(dest, src, imageSize * 3);
+                dest += imageSize * 3;
+            }
+
+            sprintf(fileName, "%s_color.tiled.png", baseFileName);
+            stbi_write_png(fileName, imageSize * 3, imageSize * 3, 3, tiled.data(), 0);
+        }
     }
 }
 
@@ -194,7 +219,7 @@ Vec2 RNGDiscrete()
         RandomFloat01(rng)
     };
 
-    ret[0] = std::floor(ret[0] * float(X - 1) + 0.5f) / float(X); // TODO: verify this is correct when you are less tired
+    ret[0] = std::floor(ret[0] * float(X - 1) + 0.5f) / float(X); // TODO: verify this is correct when you are less tired. also XToCellX and Y
     ret[1] = std::floor(ret[1] * float(Y - 1) + 0.5f) / float(Y);
 
     return ret;
@@ -204,27 +229,26 @@ int main(int argc, char** argv)
 {
     _mkdir("out");
 
-    MakeSamplesImage("out/softC", Soft::Make({ 100, 1000, 4000 }, RNGContinuous));
+    MakeSamplesImage("out/softCT", Soft::Make({ 100, 1000, 4000 }, RNGContinuous, true));
+    MakeSamplesImage("out/softCF", Soft::Make({ 100, 1000, 4000 }, RNGContinuous, false));
 
-    MakeSamplesImage("out/soft10x10", Soft::Make({ 5, 10, 20 }, RNGDiscrete<10, 10>));
-
-    MakeSamplesImage("out/soft100x100", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<100,100>));
-
-    MakeSamplesImage("out/soft256x256", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<256, 256>));
+    MakeSamplesImage("out/soft10x10", Soft::Make({ 5, 10, 20 }, RNGDiscrete<10, 10>, true));
+    MakeSamplesImage("out/soft100x100", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<100,100>, true));
+    MakeSamplesImage("out/soft256x256", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<256, 256>, true));
 
     for (int i = 0; i < 10; ++i)
     {
         char fileName[1024];
-        sprintf(fileName, "out/hard%i", i);
-        MakeSamplesImage(fileName, Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000, RNGContinuous));
+        sprintf(fileName, "out/hardT%i", i);
+        MakeSamplesImage(fileName, Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000, RNGContinuous, true));
     }
+    MakeSamplesImage("out/hardF", Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000, RNGContinuous, false));
     MakeSamplesImage("out/MCBNSPaper", GetPaperDataSetHard());
 
     return 0;
 }
 /*
 TODO:
-- distance metric lambda to compare toroidal vs not
 - DFT of pure black/white output images. need them all to be in the same range. maybe give a file pattern like *bw.*.png?
 - could do the density map feature. might help w/ your own code.
  - probably copy hard.h into a hard adaptive.h or something

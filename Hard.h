@@ -14,7 +14,7 @@ namespace Hard
     };
 
     template <size_t N, typename RNG>
-    std::vector<Point> Make(const float(&radii)[N], int targetCount, RNG& rng)
+    std::vector<Point> Make(const float(&radii)[N], int targetCount, RNG& rng, bool toroidal)
     {
         const int c_failCountFatal = targetCount * 10;
         const int c_failCountRemove = targetCount / 10;
@@ -119,7 +119,12 @@ namespace Hard
 
                 // find conflicting points using the grids
                 for (int i = 0; i < N; ++i)
-                    grids[i].GetPoints(point[0], point[1], rMatrix[i][leastPercentClass], conflicts);
+                {
+                    if (toroidal)
+                        grids[i].GetPoints<true>(point[0], point[1], rMatrix[i][leastPercentClass], conflicts);
+                    else
+                        grids[i].GetPoints<false>(point[0], point[1], rMatrix[i][leastPercentClass], conflicts);
+                }
 
                 if (conflicts.size() == 0)
                 {

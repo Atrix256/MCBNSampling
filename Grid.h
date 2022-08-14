@@ -23,6 +23,7 @@ public:
         return int(y * float(CELLSY - 1) + 0.5f);
     }
 
+    template <bool TOROIDAL>
     void GetPoints(float x, float y, float radius, std::vector<int>& results, bool append = true) const
     {
         if (!append)
@@ -33,6 +34,14 @@ public:
         int mincy = YToCellY(y - radius);
         int maxcy = YToCellY(y + radius);
 
+        if (!TOROIDAL)
+        {
+            mincx = std::max(mincx, 0);
+            maxcx = std::min(maxcx, (int)CELLSX - 1);
+            mincy = std::max(mincy, 0);
+            maxcy = std::min(maxcy, (int)CELLSY - 1);
+        }
+
         for (int iy = mincy; iy <= maxcy; ++iy)
         {
             int cy = (iy + CELLSY) % CELLSY;
@@ -43,14 +52,23 @@ public:
 
                 for (const auto& p : m_cells[cx][cy])
                 {
-                    if (ToroidalDistance(Vec2{ x, y }, Vec2{ p.x, p.y }) < radius)
-                        results.push_back(p.index);
+                    if (TOROIDAL)
+                    {
+                        if (ToroidalDistanceSq(Vec2{ x, y }, Vec2{ p.x, p.y }) < radius * radius)
+                            results.push_back(p.index);
+                    }
+                    else
+                    {
+                        if (DistanceSq(Vec2{ x, y }, Vec2{ p.x, p.y }) < radius * radius)
+                            results.push_back(p.index);
+                    }
                 }
             }
         }
     }
 
-    void GetPointToroidalDistancesSq(float x, float y, float radius, std::vector<float>& results, bool append = true) const
+    template <bool TOROIDAL>
+    void GetPointDistancesSq(float x, float y, float radius, std::vector<float>& results, bool append = true) const
     {
         if (!append)
             results.clear();
@@ -60,6 +78,14 @@ public:
         int mincy = YToCellY(y - radius);
         int maxcy = YToCellY(y + radius);
 
+        if (!TOROIDAL)
+        {
+            mincx = std::max(mincx, 0);
+            maxcx = std::min(maxcx, (int)CELLSX - 1);
+            mincy = std::max(mincy, 0);
+            maxcy = std::min(maxcy, (int)CELLSY - 1);
+        }
+
         for (int iy = mincy; iy <= maxcy; ++iy)
         {
             int cy = (iy + CELLSY) % CELLSY;
@@ -70,9 +96,13 @@ public:
 
                 for (const auto& p : m_cells[cx][cy])
                 {
-                    float toroidalDistanceSq = ToroidalDistanceSq(Vec2{ x, y }, Vec2{ p.x, p.y });
-                    if (toroidalDistanceSq < radius * radius)
-                        results.push_back(toroidalDistanceSq);
+                    float distanceSq;
+                    if (TOROIDAL)
+                        distanceSq = ToroidalDistanceSq(Vec2{ x, y }, Vec2{ p.x, p.y });
+                    else
+                        distanceSq = DistanceSq(Vec2{ x, y }, Vec2{ p.x, p.y });
+                    if (distanceSq < radius * radius)
+                        results.push_back(distanceSq);
                 }
             }
         }
