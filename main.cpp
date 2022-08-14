@@ -174,53 +174,49 @@ void MakeSamplesImage(const char* baseFileName, const std::vector<Point>& points
     }
 }
 
-struct RNGContinuous
+Vec2 RNGContinuous()
 {
-    static Vec2 Generate()
+    static pcg32_random_t rng = GetRNG();
+    return Vec2
     {
-        static pcg32_random_t rng = GetRNG();
-        return Vec2
-        {
-            RandomFloat01(rng),
-            RandomFloat01(rng)
-        };
-    }
-};
+        RandomFloat01(rng),
+        RandomFloat01(rng)
+    };
+}
 
 template <size_t X, size_t Y>
-struct RNGDiscrete
+Vec2 RNGDiscrete()
 {
-    static Vec2 Generate()
+    static pcg32_random_t rng = GetRNG();
+    Vec2 ret = Vec2
     {
-        static pcg32_random_t rng = GetRNG();
-        Vec2 ret = Vec2
-        {
-            RandomFloat01(rng),
-            RandomFloat01(rng)
-        };
+        RandomFloat01(rng),
+        RandomFloat01(rng)
+    };
 
-        ret[0] = std::floor(ret[0] * float(X - 1) + 0.5f) / float(X); // TODO: verify this is correct when you are less tired
-        ret[1] = std::floor(ret[1] * float(Y - 1) + 0.5f) / float(Y);
+    ret[0] = std::floor(ret[0] * float(X - 1) + 0.5f) / float(X); // TODO: verify this is correct when you are less tired
+    ret[1] = std::floor(ret[1] * float(Y - 1) + 0.5f) / float(Y);
 
-        return ret;
-    }
-};
+    return ret;
+}
 
 int main(int argc, char** argv)
 {
     _mkdir("out");
 
-    MakeSamplesImage("out/softC", Soft::Make({ 100, 1000, 4000 }, RNGContinuous::Generate));
+    MakeSamplesImage("out/softC", Soft::Make({ 100, 1000, 4000 }, RNGContinuous));
 
-    MakeSamplesImage("out/soft100x100", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<100,100>::Generate));
+    MakeSamplesImage("out/soft10x10", Soft::Make({ 5, 10, 20 }, RNGDiscrete<10, 10>));
 
-    MakeSamplesImage("out/soft256x256", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<256, 256>::Generate));
+    MakeSamplesImage("out/soft100x100", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<100,100>));
+
+    MakeSamplesImage("out/soft256x256", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<256, 256>));
 
     for (int i = 0; i < 10; ++i)
     {
         char fileName[1024];
         sprintf(fileName, "out/hard%i", i);
-        MakeSamplesImage(fileName, Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000, RNGContinuous::Generate));
+        MakeSamplesImage(fileName, Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000, RNGContinuous));
     }
     MakeSamplesImage("out/MCBNSPaper", GetPaperDataSetHard());
 
@@ -228,8 +224,10 @@ int main(int argc, char** argv)
 }
 /*
 TODO:
-- DFT of pure black/white output images
+- distance metric lambda to compare toroidal vs not
+- DFT of pure black/white output images. need them all to be in the same range. maybe give a file pattern like *bw.*.png?
 - could do the density map feature. might help w/ your own code.
+ - probably copy hard.h into a hard adaptive.h or something
 - maybe wait to put this out until your paper so you don't get scooped? (ha! but ... shrug)
 - after this, wasn't there another paper you needed to look at?
  - properties of jointly blue noise masks...
@@ -239,6 +237,7 @@ Paper TODO:s
  - they aren't doing removal code, and they aren't doing toroidal distance.
  - should also compare their adaptive sampling vs yours. visual quality test. or maybe do N of them and average?
   - which kinda leads into your spatiotemporal results actually...
+- could make this spatiotemporal too probably... just add the energy function on z axis
 
 Notes:
 - not a fan of dart throwing blue noise (show why via DFT?)
