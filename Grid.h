@@ -15,12 +15,12 @@ public:
 
     static const int XToCellX(float x)
     {
-        return int(x * float(CELLSX));
+        return int(std::floor(x * float(CELLSX)));
     }
 
     static const int YToCellY(float y)
     {
-        return int(y * float(CELLSY));
+        return int(std::floor(y * float(CELLSY)));
     }
 
     template <bool TOROIDAL>

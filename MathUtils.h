@@ -37,7 +37,10 @@ inline float ToroidalDistanceSq(const std::array<float, N>& A, const std::array<
     std::array<float, N> v = B - A;
 
     for (float& f : v)
+    {
+        f = std::abs(f);
         f = std::min(f, domainSize - f);
+    }
 
     return Dot(v, v);
 }
