@@ -215,13 +215,9 @@ Vec2 RNGDiscrete()
     static pcg32_random_t rng = GetRNG();
     Vec2 ret = Vec2
     {
-        RandomFloat01(rng),
-        RandomFloat01(rng)
+        float(RandomUint32(rng, X)) / float(X),
+        float(RandomUint32(rng, Y)) / float(Y)
     };
-
-    ret[0] = std::floor(ret[0] * float(X - 1) + 0.5f) / float(X); // TODO: verify this is correct when you are less tired.
-    ret[1] = std::floor(ret[1] * float(Y - 1) + 0.5f) / float(Y);
-
     return ret;
 }
 

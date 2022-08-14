@@ -13,7 +13,7 @@ namespace Soft
     };
 
     template <size_t N, typename RNG>
-    std::vector<Point> Make(const int(&counts)[N], RNG& rng, bool toroidal)
+    std::vector<Point> Make(const int(&counts)[N], RNG& rng, bool toroidal, int candidateMultiplier = 5)
     {
         std::vector<Grid<100, 100>> grids(N);
 
@@ -101,8 +101,7 @@ namespace Soft
                 Vec2 bestCandidate;
                 float bestScore = FLT_MAX;
 
-                // TODO: is this the best strategy here? a k of 1 i mean
-                int candidateCount = int(ret.size()) * 5 + 1;
+                int candidateCount = int(ret.size()) * candidateMultiplier + 1;
                 for (int i = 0; i < candidateCount; ++i)
                 {
                     Vec2 candidate = rng();

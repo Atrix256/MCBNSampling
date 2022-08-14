@@ -23,3 +23,8 @@ inline float RandomFloat01(pcg32_random_t& rng)
 {
     return float(pcg32_random_r(&rng)) / 4294967295.0f;
 }
+
+inline uint32_t RandomUint32(pcg32_random_t& rng, uint32_t bound)
+{
+    return pcg32_boundedrand_r(&rng, bound);
+}
