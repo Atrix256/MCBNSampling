@@ -251,10 +251,10 @@ int main(int argc, char** argv)
     _mkdir("out");
 
     MakeSamplesImage("out/softCT", Soft::Make({ 100, 1000, 4000 }, RNGContinuous, true));
-    MakeSamplesImage("out/softCF", Soft::Make({ 100, 1000, 4000 }, RNGContinuous, false));
+    //MakeSamplesImage("out/softCF", Soft::Make({ 100, 1000, 4000 }, RNGContinuous, false));
 
-    MakeSamplesImage("out/soft10x10", Soft::Make({ 5, 10, 20 }, RNGDiscrete<10, 10>, true));
-    MakeSamplesImage("out/soft100x100", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<100,100>, true));
+    //MakeSamplesImage("out/soft10x10", Soft::Make({ 5, 10, 20 }, RNGDiscrete<10, 10>, true));
+    //MakeSamplesImage("out/soft100x100", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<100,100>, true));
     MakeSamplesImage("out/soft256x256", Soft::Make({ 100, 1000, 4000 }, RNGDiscrete<256, 256>, true));
 
     for (int i = 0; i < 10; ++i)
@@ -263,7 +263,7 @@ int main(int argc, char** argv)
         sprintf(fileName, "out/hardT%i", i);
         MakeSamplesImage(fileName, Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000, RNGContinuous, true));
     }
-    MakeSamplesImage("out/hardF", Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000, RNGContinuous, false));
+    //MakeSamplesImage("out/hardF", Hard::Make({ {0.04f}, {0.02f}, {0.01f} }, 10000, RNGContinuous, false));
 
     for (int i = 0; i < 10; ++i)
     {
