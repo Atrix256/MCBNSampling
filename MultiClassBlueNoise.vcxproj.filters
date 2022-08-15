@@ -7,7 +7,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stb_image_write.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="pcg\pcg_basic.h">
       <Filter>pcg</Filter>
@@ -17,6 +16,13 @@
     <ClInclude Include="Hard.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="Soft.h" />
+    <ClInclude Include="HardAdaptive.h" />
+    <ClInclude Include="stb\stb_image.h">
+      <Filter>stb</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_image_write.h">
+      <Filter>stb</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="pcg">
@@ -24,6 +30,9 @@
     </Filter>
     <Filter Include="PaperData">
       <UniqueIdentifier>{4d572751-8190-40ff-b5f5-931647ef6d37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stb">
+      <UniqueIdentifier>{0f00f765-f5d9-49d6-a712-273da1059960}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

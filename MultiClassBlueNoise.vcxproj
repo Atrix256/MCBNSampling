@@ -145,12 +145,14 @@
   <ItemGroup>
     <ClInclude Include="Grid.h" />
     <ClInclude Include="Hard.h" />
+    <ClInclude Include="HardAdaptive.h" />
     <ClInclude Include="IndexToColor.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="pcg\pcg_basic.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="Soft.h" />
-    <ClInclude Include="stb_image_write.h" />
+    <ClInclude Include="stb\stb_image.h" />
+    <ClInclude Include="stb\stb_image_write.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="paperdata\Hard0.txt">

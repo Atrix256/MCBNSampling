@@ -2,6 +2,12 @@
 
 #include <array>
 
+typedef std::array<float, 2> Vec2;
+typedef std::array<float, 3> Vec3;
+
+typedef std::array<uint32_t, 2> Vec2u;
+typedef std::array<uint32_t, 3> Vec3u;
+
 static const float c_pi = 3.14159265359f;
 
 float Clamp(float value, float themin, float themax)

@@ -5,15 +5,15 @@
 #include <array>
 #include <direct.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include "stb/stb_image_write.h"
 
 #include "Random.h"
 #include "MathUtils.h"
 #include "IndexToColor.h"
-
-typedef std::array<float, 2> Vec2;
-typedef std::array<float, 3> Vec3;
 
 struct Point
 {
@@ -23,6 +23,7 @@ struct Point
 
 #include "Hard.h"
 #include "Soft.h"
+#include "HardAdaptive.h"
 
 void DrawDot(unsigned char* pixels, int imageSize, int x, int y, float radius, const unsigned char (&RGB)[3])
 {
@@ -221,6 +222,17 @@ Vec2 RNGDiscrete()
     return ret;
 }
 
+Vec2u RNGDiscreteParams(int X, int Y)
+{
+    static pcg32_random_t rng = GetRNG();
+    Vec2u ret = Vec2u
+    {
+        RandomUint32(rng, X),
+        RandomUint32(rng, Y)
+    };
+    return ret;
+}
+
 std::vector<Point> GetPointsFromTextFile(const char* fileName)
 {
     FILE* file = nullptr;
@@ -263,6 +275,21 @@ void DoDFTs(const char* fileNamePattern, int numClasses)
 int main(int argc, char** argv)
 {
     _mkdir("out");
+
+    // Hard adaptive images
+    // TODO: put this at the end when it's working
+    if(true)
+    {
+        // Hard adaptive images
+        for (int i = 0; i < 10; ++i)
+        {
+            char fileName[1024];
+            sprintf(fileName, "out/HardAdaptive%i", i);
+            MakeSamplesImage(fileName, HardAdaptive::Make({ {"clouds.png", 0.001f, 0.005f}, {"centerblob.png", 0.001f, 0.005f} }, 1024, 1024, 5000, RNGDiscreteParams));
+        }
+        DoDFTs("out/HardAdaptive%%i_bw.%s.png", 2);
+        return 0;
+    }
 
     // Soft images
     for (int i = 0; i < 10; ++i)
