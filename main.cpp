@@ -276,6 +276,13 @@ int main(int argc, char** argv)
 {
     _mkdir("out");
 
+    if(false)
+    {
+        MakeSamplesImage("out/clouds", HardAdaptive::Make({{"clouds.png", 0.0005f, 0.0001f}}, 1024, 1024, 5000, RNGDiscreteParams));
+        //MakeSamplesImage("out/centerblob", HardAdaptive::Make({ {"centerblob.png", 0.001f, 0.005f} }, 1024, 1024, 5000, RNGDiscreteParams));
+        return 0;
+    }
+
     // Hard adaptive images
     // TODO: put this at the end when it's working
     if(true)

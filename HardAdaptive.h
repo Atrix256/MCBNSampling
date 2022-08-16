@@ -78,8 +78,7 @@ namespace HardAdaptive
             layers[i].rmax = layers_[i].rmax;
             layers[i].originalIndex = i;
             LoadImage(layers[i], imageW, imageH);
-
-            printf("[%i] %f\n", i, layers[i].imageExpectedRadius);
+            //printf("[%i] %f\n", i, layers[i].imageExpectedRadius);
         }
 
         std::sort(
@@ -100,7 +99,7 @@ namespace HardAdaptive
             {
                 float percent = (1.0f / (layers[i].imageExpectedRadius * layers[i].imageExpectedRadius)) / sumInverseRadiusSquared;
                 layers[i].targetCount = int(float(targetCount) * percent);
-                printf("[%i] %i target, %0.2f percent\n", i, layers[i].targetCount, 100.0f * percent);
+                //printf("[%i] %i target, %0.2f percent\n", i, layers[i].targetCount, 100.0f * percent);
             }
         }
 
