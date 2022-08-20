@@ -297,9 +297,10 @@ int main(int argc, char** argv)
             sprintf(fileName, "out/HardAdaptive%i", i);
             MakeSamplesImage(fileName, HardAdaptive::Make({ {"clouds.png", 0.001f, 0.04f}, {"clouds.png", 0.001f, 0.02f}, {"centerblob.png", 0.001f, 0.01f} }, 1024, 1024, 5000, RNGDiscreteParams));
         }
-        DoDFTs("out/HardAdaptive%%i_bw.%s.png", 2);
-        return 0;
+        DoDFTs("out/HardAdaptive%%i_bw.%s.png", 3);
     }
+
+#if 0
 
     // Soft images
     for (int i = 0; i < 10; ++i)
@@ -341,6 +342,8 @@ int main(int argc, char** argv)
     }
     DoDFTs("out/MCBNSPaperHard%%i_bw.%s.png", 3);
 
+#endif
+
     // Adaptive sets from paper
     for (int i = 0; i < 10; ++i)
     {
@@ -356,8 +359,8 @@ int main(int argc, char** argv)
 }
 /*
 TODO: before a blog post
+- the paper adaptive code is showing the inverse of this code. find out where it's different
 - do the "adaptive sampling" feature
- - probably copy hard.h into a hard adaptive.h or something
 - for adaptive tests, could show an average of the images.
  
 NEXT:
