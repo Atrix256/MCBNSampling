@@ -295,7 +295,7 @@ int main(int argc, char** argv)
         {
             char fileName[1024];
             sprintf(fileName, "out/HardAdaptive%i", i);
-            MakeSamplesImage(fileName, HardAdaptive::Make({ {"clouds.png", 0.001f, 0.005f}, {"centerblob.png", 0.001f, 0.005f} }, 1024, 1024, 5000, RNGDiscreteParams));
+            MakeSamplesImage(fileName, HardAdaptive::Make({ {"clouds.png", 0.001f, 0.04f}, {"clouds.png", 0.001f, 0.02f}, {"centerblob.png", 0.001f, 0.01f} }, 1024, 1024, 5000, RNGDiscreteParams));
         }
         DoDFTs("out/HardAdaptive%%i_bw.%s.png", 2);
         return 0;
@@ -358,7 +358,7 @@ int main(int argc, char** argv)
 TODO: before a blog post
 - do the "adaptive sampling" feature
  - probably copy hard.h into a hard adaptive.h or something
-
+- for adaptive tests, could show an average of the images.
  
 NEXT:
 - maybe wait to put this out until your paper so you don't get scooped? (ha! but ... shrug)
@@ -385,6 +385,7 @@ Notes:
  - so, some minor bugs seemingly :shrug:
  - hard to know what parameters to give, and the readme that gives an example command line argument is out of date
  - the params it specifies don't cause removal to happen.
+- for the adaptive paper code, i made it able to load pngs. i add 1 to the u8 and divide by 256. letting it be 0 (if just / 255) made 1/value go to inf which was a problem
 
 NOTE:num trial calculation: (hard disk)
 amplification = sqrt(2) / minimum r matrix value
