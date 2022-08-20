@@ -361,7 +361,6 @@ int main(int argc, char** argv)
 TODO: before a blog post
 - the paper adaptive code is showing the inverse of this code. find out where it's different
 - do the "adaptive sampling" feature
-- for adaptive tests, could show an average of the images.
  
 NEXT:
 - maybe wait to put this out until your paper so you don't get scooped? (ha! but ... shrug)

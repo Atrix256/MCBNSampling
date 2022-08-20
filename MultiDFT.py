@@ -180,6 +180,7 @@ else:
     DFTNormalize = True
 
 samples = []
+samplesAvg = []
 
 if isNPY:
     samples = np.load(fileNameBase + '.npy') / 255.0
@@ -196,10 +197,14 @@ else:
         im = im.reshape(im.shape[0], im.shape[1], 1)
         if i == 0:
             samples = im
+            samplesAvg = im.reshape(im.shape[0], im.shape[1]) / fileCount
         else:
             samples = np.append(samples, im, axis=2)
+            samplesAvg = samplesAvg + im.reshape(im.shape[0], im.shape[1]) / fileCount
 
 Process(samples, fileNameBase.replace("%i", "all") + ".XY")
+
+Image.fromarray((samplesAvg*255.0).astype(np.uint8), mode="L").save(fileNameBase + ".avg.png");
 
 if doXZ:    
     samples = np.rot90(samples, axes=(0,2))
