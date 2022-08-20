@@ -358,6 +358,14 @@ int main(int argc, char** argv)
     return 0;
 }
 /*
+TODO: adaptive differences
+* Utility::NormalizeRValues() does a thing that modifies the r values.
+* Utility::GetDistanceField() uses that to calculate sample counts... global and local. unsure what that is used for
+* SampledRMatrixField uses that sampled distance field
+
+*/
+
+/*
 TODO: before a blog post
 - the paper adaptive code is showing the inverse of this code. find out where it's different
 - do the "adaptive sampling" feature
