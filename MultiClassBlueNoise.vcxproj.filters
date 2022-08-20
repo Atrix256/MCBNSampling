@@ -66,5 +66,35 @@
     <Text Include="paperdata\Hard9.txt">
       <Filter>PaperData</Filter>
     </Text>
+    <Text Include="paperdata\adaptive0.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\adaptive1.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\adaptive2.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\adaptive3.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\adaptive4.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\adaptive5.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\adaptive6.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\adaptive7.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\adaptive8.txt">
+      <Filter>PaperData</Filter>
+    </Text>
+    <Text Include="paperdata\adaptive9.txt">
+      <Filter>PaperData</Filter>
+    </Text>
   </ItemGroup>
 </Project>

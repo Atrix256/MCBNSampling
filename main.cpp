@@ -276,6 +276,9 @@ int main(int argc, char** argv)
 {
     _mkdir("out");
 
+    // Todo: step through adaptive
+    // todo: have it cakculate trial count like the other code
+
     if(false)
     {
         MakeSamplesImage("out/clouds", HardAdaptive::Make({{"clouds.png", 0.0005f, 0.0001f}}, 1024, 1024, 5000, RNGDiscreteParams));
@@ -338,6 +341,17 @@ int main(int argc, char** argv)
     }
     DoDFTs("out/MCBNSPaperHard%%i_bw.%s.png", 3);
 
+    // Adaptive sets from paper
+    for (int i = 0; i < 10; ++i)
+    {
+        char fileNameSrc[1024];
+        char fileNameDest[1024];
+        sprintf(fileNameSrc, "paperdata/adaptive%i.txt", i);
+        sprintf(fileNameDest, "out/MCBNSPaperAdaptive%i", i);
+        MakeSamplesImage(fileNameDest, GetPointsFromTextFile(fileNameSrc));
+    }
+    DoDFTs("out/MCBNSPaperAdaptive%%i_bw.%s.png", 3);
+
     return 0;
 }
 /*
@@ -380,6 +394,7 @@ but fill and such are totally based on trial count. fill doesn't have to be. it 
 
 TODO: could revive other repo by forking it.
 command line param: .\DartThrowing.exe 2 3 1 1 1 0.04 0.02 0.01 4 1 1 > out.txt
+command line param for adaptive: .\AdaptiveDartThrowing.exe 2 3 1 1 1 0.04 0.02 0.01 4 1 1 0 clouds.png clouds.png centerblob.png > out.txt
 - put notes above. esp, that they aren't removing and they aren't doing toroidal distance which affects DFT.
 */
 
